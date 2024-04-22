@@ -18,6 +18,19 @@
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
+        android:id="@+id/navigation_tarefas"
+        android:name="com.example.mynavigation.ui.tarefas.TarefasFragment"
+        android:label="Tarefas"
+        tools:layout="@layout/fragment_tarefas" />
+
+    <fragment
+        android:id="@+id/navigation_adicionar"
+        android:name="com.example.mynavigation.ui.adicionar.AdicionarFragment"
+        android:label="Nova Tarefa"
+        tools:layout="@layout/fragment_adicionar" />
+
+
+    <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.example.mynavigation.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
