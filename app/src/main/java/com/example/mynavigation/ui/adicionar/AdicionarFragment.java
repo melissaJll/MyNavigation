@@ -50,80 +50,114 @@ public class AdicionarFragment extends Fragment {
         selectDateButton = view.findViewById(R.id.selecionarData);
         definirHorarioButton = view.findViewById(R.id.definirHorario);
         adicionarTarefa = view.findViewById(R.id.adicionaTarefa);
+        calendarioTextView = view.findViewById(R.id.calendarioTextView);
+        horarioTextView = view.findViewById(R.id.horarioTextView);
 
         calendar = Calendar.getInstance();
 
-        selectDateButton.setOnClickListener(v -> {
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
+        // um dialog de data limite
+        selectDateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(),
-                    (view1, year1, month1, dayOfMonth) -> {
-                        calendar.set(Calendar.YEAR, year1);
-                        calendar.set(Calendar.MONTH, month1);
-                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                DatePickerDialog datePickerDialog = new DatePickerDialog( requireContext(),
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                                calendar.set(Calendar.YEAR, year);
+                                calendar.set(Calendar.MONTH, month);
+                                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                        String selectedDate = sdf.format(calendar.getTime());
-                        Toast.makeText(getActivity(), "Data selecionada: " + selectedDate, Toast.LENGTH_SHORT).show();
-                        calendarioTextView.setText(selectedDate);
-                    }, year, month, day);
-            datePickerDialog.show();
-        });
-
-        definirHorarioButton.setOnClickListener(v -> {
-            int hour = calendar.get(Calendar.HOUR_OF_DAY);
-            int minute = calendar.get(Calendar.MINUTE);
-
-            TimePickerDialog timePickerDialog = new TimePickerDialog(getActivity(),
-                    (view12, hourOfDay, minute1) -> {
-                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        calendar.set(Calendar.MINUTE, minute1);
-
-                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                        String selectedTime = sdf.format(calendar.getTime());
-                        horarioTextView.setText(selectedTime);
-                    }, hour, minute, true);
-            timePickerDialog.show();
-        });
-
-        adicionarTarefa.setOnClickListener(v -> {
-
-            try {
-                // usando o contexto do fragmento para abrir o banco de dados
-                SQLiteDatabase bancoDados = getActivity().openOrCreateDatabase("CheckList", getActivity().MODE_PRIVATE, null);
-                bancoDados.execSQL("CREATE TABLE IF NOT EXISTS minhasTarefas (id INTEGER PRIMARY KEY AUTOINCREMENT, tarefa VARCHAR, data VARCHAR, horario VARCHAR)");
-
-                // Obtém a tarefa digitada
-                String novaTarefa = nomeTarefa.getText().toString();
-                // data
-                String dataTarefa = calendarioTextView.getText().toString();
-                // horário
-                String horarioTarefa = horarioTextView.getText().toString();
-
-                // Inserindo na tabel minhasTarefas
-                bancoDados.execSQL("INSERT INTO minhasTarefas (tarefa, data, horario) VALUES('" + novaTarefa + "', '" + dataTarefa + "', '" + horarioTarefa + "')");
-
-                // Exibe as tarefas no Log
-                Cursor cursor = bancoDados.rawQuery("SELECT * FROM minhasTarefas", null);
-                int indiceColunaID = cursor.getColumnIndex("id");
-                int indiceColunaTarefa = cursor.getColumnIndex("tarefa");
-                int indiceColunaData = cursor.getColumnIndex("data");
-                int indiceColunaHorario = cursor.getColumnIndex("horario");
-
-                cursor.moveToFirst();
-                while (!cursor.isAfterLast()) {
-                    Log.i("Logx", "ID: " + cursor.getString(indiceColunaID) + " - Tarefa: " + cursor.getString(indiceColunaTarefa) + " - Data: " + cursor.getString(indiceColunaData) + " - Horário: " + cursor.getString(indiceColunaHorario));
-                    cursor.moveToNext();
-                }
-
-                cursor.close();
-
-            } catch(Exception e) {
-                e.printStackTrace();
+                                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                                String selectedDate = sdf.format(calendar.getTime());
+                                Toast.makeText(getActivity(),"Data selecionada:" + selectedDate,Toast.LENGTH_SHORT).show();
+                                calendarioTextView.setText(selectedDate);
+                            }
+                        }, year, month, day);
+                datePickerDialog.show();
             }
         });
+
+
+        // um dialog de horário
+        definirHorarioButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                int minute = calendar.get(Calendar.MINUTE);
+
+                TimePickerDialog timePickerDialog = new TimePickerDialog(
+                        requireContext(),
+                        new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                // Aqui você pode lidar com o horário definido pelo usuário
+                                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                calendar.set(Calendar.MINUTE, minute);
+
+                                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                                String selectedTime = sdf.format(calendar.getTime());
+                                Toast.makeText(getActivity(), "Horário selecionado: " + selectedTime, Toast.LENGTH_SHORT).show();
+                                horarioTextView.setText(selectedTime);
+                            }
+                        },
+                        hour,
+                        minute,
+                        true
+                );
+
+                timePickerDialog.show();
+            }
+        });
+
+
+
+
+        //BOTÃO QUE IRÁ ENVIAR PARA TABELA DO SQLlITE
+        adicionarTarefa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    // Using the fragment's context to open the database
+                    SQLiteDatabase bancoDados = getActivity().openOrCreateDatabase("CheckList", getActivity().MODE_PRIVATE, null);
+                    bancoDados.execSQL("CREATE TABLE IF NOT EXISTS minhasTarefas (id INTEGER PRIMARY KEY AUTOINCREMENT, tarefa VARCHAR, data VARCHAR, horario VARCHAR)");
+
+                    // nome da tarefa
+                    String novaTarefa = nomeTarefa.getText().toString();
+                    // data
+                    String dataTarefa = calendarioTextView.getText().toString();
+                    // tempo
+                    String horarioTarefa = horarioTextView.getText().toString();
+
+                    // Insert into the minhasTarefas table
+                    bancoDados.execSQL("INSERT INTO minhasTarefas (tarefa, data, horario) VALUES('" + novaTarefa + "', '" + dataTarefa + "', '" + horarioTarefa + "')");
+
+                    // Display tasks in the Log
+                    Cursor cursor = bancoDados.rawQuery("SELECT * FROM minhasTarefas", null);
+                    int indiceColunaID = cursor.getColumnIndex("id");
+                    int indiceColunaTarefa = cursor.getColumnIndex("tarefa");
+                    int indiceColunaData = cursor.getColumnIndex("data");
+                    int indiceColunaHorario = cursor.getColumnIndex("horario");
+
+                    cursor.moveToFirst();
+                    while (!cursor.isAfterLast()) {
+                        Log.i("Logx", "ID: " + cursor.getString(indiceColunaID) +
+                                " - Tarefa: " + cursor.getString(indiceColunaTarefa) +
+                                " - Data: " + cursor.getString(indiceColunaData) +
+                                " - Horário: " + cursor.getString(indiceColunaHorario));
+                        cursor.moveToNext();
+                    }
+
+                    cursor.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
 
 
         return view;
