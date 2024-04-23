@@ -59,6 +59,7 @@ public class AdicionarFragment extends Fragment {
         selectDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //captura os dados selecionados de forma separada
                 int year = calendar.get(Calendar.YEAR);
                 int month = calendar.get(Calendar.MONTH);
                 int day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -121,7 +122,7 @@ public class AdicionarFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
-                    // Using the fragment's context to open the database
+                    // fragmento context para abrir database
                     SQLiteDatabase bancoDados = getActivity().openOrCreateDatabase("CheckList", getActivity().MODE_PRIVATE, null);
                     bancoDados.execSQL("CREATE TABLE IF NOT EXISTS minhasTarefas (id INTEGER PRIMARY KEY AUTOINCREMENT, tarefa VARCHAR, data VARCHAR, horario VARCHAR)");
 
@@ -135,7 +136,7 @@ public class AdicionarFragment extends Fragment {
                     // Insert into the minhasTarefas table
                     bancoDados.execSQL("INSERT INTO minhasTarefas (tarefa, data, horario) VALUES('" + novaTarefa + "', '" + dataTarefa + "', '" + horarioTarefa + "')");
 
-                    // Display tasks in the Log
+                    // Exibindo no log com comando SELECT sql
                     Cursor cursor = bancoDados.rawQuery("SELECT * FROM minhasTarefas", null);
                     int indiceColunaID = cursor.getColumnIndex("id");
                     int indiceColunaTarefa = cursor.getColumnIndex("tarefa");
