@@ -153,6 +153,8 @@ public class AdicionarFragment extends Fragment {
                     }
 
                     cursor.close();
+                    Toast.makeText(getActivity(),"Tarefa adicionada",Toast.LENGTH_SHORT).show();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
